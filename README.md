@@ -34,7 +34,7 @@ services:
 ```
 If using the docker version, you can initialize the settings file with this command.
 ```
-docker run --rm -it -v "./pattrmm/preferences:/preferences" ghcr.io/insertdisc/pattrmm:latest --run
+docker run --rm -it -v "./pattrmm/preferences:/preferences" ghcr.io/insertdisc/pattrmm:develop --run
 ```
 The DEVELOP branch of docker is slightly ahead of the latest branch. Extensions have been added and will continue to expand.
 ```
