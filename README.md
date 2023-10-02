@@ -49,7 +49,7 @@ Extension Use Example:
   Using PATTRMM's setting file.
 
 libraries:
-  Movies:
+  Movies: <-- Movie libraries do not need 'returning-soon' disabled. They are not compatible and are ignored.
     extensions:
       in-history:
         range: month <-- In history range. Options are: day, week, month
