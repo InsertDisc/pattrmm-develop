@@ -41,7 +41,9 @@ The DEVELOP branch is slightly ahead of the latest branch. Extensions have been 
 ```
 Extensions Available:
   in-history
-    This extension uses the Originally Available At date within Plex to create Trakt lists based on a specified range per library and a corresponding 'in-history' metadata file for use with that library.
+    This extension uses the Originally Available At date within Plex to create Trakt lists
+    based on a specified range per library and a corresponding 'in-history' metadata file
+    for use with that library.
     Available options are, day, week, and month.
 Extension Use Example:
   Using PATTRMM's setting file.
