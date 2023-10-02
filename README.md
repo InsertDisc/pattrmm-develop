@@ -72,7 +72,7 @@ date_style: 1 <-- Optional date style format. (1) for mm/dd, (2) for dd/mm
 
 ```
 Each extension can only be used within a library ONCE, otherwise an error will occur.
-In-History supports ONE range.
+In-History supports ONE range per library.
 ```
 What now:
 
