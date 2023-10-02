@@ -61,8 +61,6 @@ libraries:
         range: week
   Anime:
     returning-soon: False <-- if you only want to use extensions on this 'Show' library.
-    refresh: 7
-    days_ahead: 45
     extensions:
       in-history:
         range: day
