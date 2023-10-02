@@ -36,7 +36,7 @@ If using the docker version, you can initialize the settings file with this comm
 ```
 docker run --rm -it -v "./pattrmm/preferences:/preferences" ghcr.io/insertdisc/pattrmm:develop --run
 ```
-The DEVELOP branch of docker is slightly ahead of the latest branch. Extensions have been added and will continue to expand.
+The DEVELOP branch is slightly ahead of the latest branch. Extensions have been added and will continue to expand.
 ```
 Extensions Available:
   in-history
