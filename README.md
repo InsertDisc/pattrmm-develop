@@ -75,6 +75,7 @@ What now:
 
     Add the ?-returning-soon.yml under the appropriate metadata section of the corresponding library you are having it scan.
     Add the overlays/?-returning-soon-overlay.yml under the appropriate overlay section of the same library.
+    Don't forget to add any additional metadata files that any 'extensions' you are using create as well.
 
 When to run:
     
