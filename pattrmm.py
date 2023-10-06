@@ -19,7 +19,6 @@ from ruamel.yaml import YAML
 yaml = YAML()
 yaml.preserve_quotes = True
 from io import StringIO
-output_stream = StringIO()
 import xml.etree.ElementTree as ET
 import logging
 import sys
@@ -1820,6 +1819,7 @@ Extension setting found. Running 'In History' on {thisLibrary}
                 collection_title = extension.collection_title
                 in_history_meta = extension.meta
                 try:
+                    output_stream = StringIO()
                     yaml.dump(in_history_meta, output_stream)
                     in_history_meta_str = output_stream.getvalue()
                     output_stream.close()
