@@ -198,6 +198,7 @@ Enables the 'In History' extension for a library.
         {{Range}} can be used instead for a capitalized range.
         Released This {{Range}} In History, would generate:
             Released This Month In History
+        The {{range}} and {{Range}} placeholders will also work in a 'summary' if you decide to add one to meta options.
 
   meta:
         Here's where you can apply your 'touch'.
