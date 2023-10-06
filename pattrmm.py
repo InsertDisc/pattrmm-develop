@@ -18,7 +18,8 @@ from ruamel.yaml import YAML
 # assign YAML variable
 yaml = YAML()
 yaml.preserve_quotes = True
-
+from io import StringIO
+output_stream = StringIO()
 import xml.etree.ElementTree as ET
 import logging
 import sys
@@ -84,8 +85,12 @@ if os.path.isfile(settings) == False:
         '''
 libraries:
   TV Shows:                          # Plex Libraries to read from. Can enter multiple libraries.
-    status_refresh: 30               # Full-refresh delay for library          
+    refresh: 30                      # Full-refresh delay for library          
     days_ahead: 30                   # How far ahead to consider 'Returning Soon'
+      extensions:
+        in-history:
+          range: month
+date_style: 1                        # 1 for mm/dd, 2 for dd/mm
 overlay_prefix: "RETURNING"          # Text to display before the dates.
 leading_zeros: True                  # 01/14 vs 1/14 for dates. True or False
 returning_soon_bgcolor: "#81007F"
@@ -135,6 +140,7 @@ if not isVars:
         '''
 from ruamel.yaml import YAML
 yaml = YAML()
+yaml.preserve_quotes = True
 import xml.etree.ElementTree as ET
 import requests
 import json
@@ -196,7 +202,79 @@ class itemDetails:
         self.imdb = imdb
         self.tmdb = tmdb
         self.tvdb = tvdb
-        
+
+class Extensions:
+    def __init__(self, extension_library):
+        self.extension_library = extension_library
+
+    @property
+    def in_history(self):
+        self.context = 'in_history'
+        return self
+
+    def settings(self):
+        if self.context == 'in_history':
+            settings = settings_path
+            with open(settings) as sf:
+                pref = yaml.load(sf)
+            me = traktApi('me')
+            slug = cleanPath(self.extension_library)
+            self.slug = slug
+            trakt_list_meta = f"https://trakt.tv/users/{me}/lists/in-history-{slug}"
+            try:
+                range = pref['libraries'][self.extension_library]['extensions']['in-history']['range']
+                range_lower = range.lower()
+                self.range = range_lower
+            except KeyError:
+                self.range = 'day'        
+            try:
+                self.save_folder = pref['libraries'][self.extension_library]['extensions']['in-history']['save_folder']
+            except KeyError:
+                self.save_folder = ''
+            try:
+                self.collection_title = pref['libraries'][self.extension_library]['extensions']['in-history']['collection_title']
+            except KeyError:
+                self.collection_title = 'This {{range}} in history'
+            if "{{range}}" in self.collection_title:
+                self.collection_title = self.collection_title.replace("{{range}}", self.range)
+            if "{{Range}}" in self.collection_title:
+                self.collection_title = self.collection_title.replace("{{Range}}", self.range.capitalize())
+            try:
+                self.starting = pref['libraries'][self.extension_library]['extensions']['in-history']['starting']
+            except KeyError:
+                self.starting = 0
+            try:
+                self.ending = pref['libraries'][self.extension_library]['extensions']['in-history']['ending']
+            except KeyError:
+                self.ending = today.year
+            try:
+                self.increment = pref['libraries'][self.extension_library]['extensions']['in-history']['increment']
+            except KeyError:
+                self.increment = 1
+            try:
+                try:
+                    options = {
+                    key: value
+                    for key, value in pref['libraries'][self.extension_library]['extensions']['in-history']['meta'].items()
+                        }
+                    if "sort_title" in options:
+                        options['sort_title'] = '"' + options['sort_title'] + '"'
+                except KeyError:
+                    options = {}
+                self.meta = {}
+                self.meta['collections'] = {}
+                self.meta['collections'][self.collection_title] = {}
+                self.meta['collections'][self.collection_title]['trakt_list'] = trakt_list_meta
+                self.meta['collections'][self.collection_title]['visible_home'] = 'true'
+                self.meta['collections'][self.collection_title]['visible_shared'] = 'true'
+                self.meta['collections'][self.collection_title]['collection_order'] = 'custom'
+                self.meta['collections'][self.collection_title]['sync_mode'] = 'sync'
+                self.meta['collections'][self.collection_title].update(options)
+                
+            except Exception as e:
+                return f"Error: {str(e)}"
+        return self
+                
 
 class Plex:
     def __init__(self, plex_url, plex_token, tmdb_api_key):
@@ -311,8 +389,13 @@ class Plex:
                 if response.status_code == 200:
                     data = response.json()
                     for item in data['MediaContainer']['Metadata']:
+                        try:
+                            check_if_has_date = item['originallyAvailableAt']
 
-                        library_list.append(LibraryList(title=item['title'],ratingKey=item['ratingKey'], date=item['originallyAvailableAt']))
+                            library_list.append(LibraryList(title=item['title'],ratingKey=item['ratingKey'], date=item['originallyAvailableAt']))
+                        except KeyError:
+                            print(f"{item['title']} has no 'Originally Available At' date. Ommitting title.")
+                            continue
                     return library_list
                 else:
                     return f"Error: {response.status_code} - {response.text}"
@@ -610,11 +693,6 @@ def librarySetting(library, value):
                         entry = 90
                 except:
                     entry = 30
-            if value == 'range':
-                try:
-                    entry = pref['libraries'][library]['extensions']['in-history']['range']
-                except:
-                    entry = 'day'
         return entry
 
 def setting(value):
@@ -1654,6 +1732,7 @@ overlays:
     logging.info("Clearing " + library + " trakt list...")
     traktDeleteList = requests.delete(traktListUrlPost, headers=traktHeaders)
     time.sleep(1.25)
+    logging.info("Initializing " + library + " trakt list...")
     traktMakeList = requests.post(traktListUrl, headers=traktHeaders, data=traktListData)
     time.sleep(1.25)
     traktListShow = '''
@@ -1679,6 +1758,7 @@ overlays:
 '''
     
     postShow = requests.post(traktListUrlPostShow, headers=traktHeaders, data=traktListShow)
+    print(postShow.status_code)
     if postShow.status_code == 201:
         print("Success")
         print("Added " + str(get_count(returningSorted)) + " entries to Trakt.")
@@ -1717,47 +1797,71 @@ for thisLibrary in extensionSettings['libraries']:
 Extension setting found. Running 'In History' on {thisLibrary}
 ''')
                 logging.info(f"Extension setting found. Running 'In History' on {thisLibrary}")
-
+                extension = vars.Extensions(thisLibrary).in_history.settings()
+                save_folder = configPathPrefix + extension.save_folder
+                if save_folder != '':
+                    is_save_folder = os.path.exists(save_folder)
+                    if not is_save_folder:
+                        subfolder_display_path = f"config/{extension.save_folder}"
+                        print(f"Sub-folder {subfolder_display_path} not found.")
+                        print(f"Attempting to create.")
+                        logging.info(f"Sub-folder {subfolder_display_path} not found.")
+                        logging.info(f"Attempting to create.")
+                        try:
+                            os.makedirs(save_folder)
+                            print(f"{subfolder_display_path} created successfully.")
+                            logging.info(f"{subfolder_display_path} created successfully.")
+                        except Exception as sf:
+                            print(f"Exception: {str(sf)}")
+                            logging.warning(f"Exception: {str(sf)}")
+                range = extension.range
                 me = vars.traktApi('me')
-                slug = vars.cleanPath(thisLibrary)
+                slug = vars.cleanPath(extension.slug)
+                collection_title = extension.collection_title
+                in_history_meta = extension.meta
+                try:
+                    yaml.dump(in_history_meta, output_stream)
+                    in_history_meta_str = output_stream.getvalue()
+                    output_stream.close()
+                    in_history_meta_str = in_history_meta_str.replace("'","")
+                    in_history_meta_str = in_history_meta_str.replace('{{range}}', range)
+                    in_history_meta_str = in_history_meta_str.replace('{{Range}}', range.capitalize())
+                except Exception as e:
+                    print(f"An error occurred: {e}")
 
-                range = vars.librarySetting(thisLibrary, 'range')
-                
-                collection_title = f'This {range} in history'
 
-                print(f"Filtering ==> This '{range}' in history")
-                print(f'''
-''')
-                logging.info(f'Filtering ==> This {range} in history')
-
-                inHistory = f"{configPathPrefix}{slug}-in-history.yml"
+                inHistory = f"{configPathPrefix}{extension.save_folder}{slug}-in-history.yml"
                 isInHistory = os.path.exists(inHistory)
+
                 if not isInHistory:
-                    print(f"Creating {thisLibrary} 'In History' metadata file..")
-                    logging.info(f"Creating {thisLibrary} 'In History' metadata file..")
-                    writeInHistory = open(inHistory, "x")
-                    writeInHistory.write(
-            f'''
-collections:
-  {collection_title}:
-    trakt_list: https://trakt.tv/users/{me}/lists/in-history-{slug}
-    collection_order: custom
-    visible_home: true
-    visible_shared: true
-    sync_mode: sync
-    '''
-        )
-                    writeInHistory.close()
+                    try:
+                        print(f"Creating {thisLibrary} 'In History' metadata file..")
+                        logging.info(f"Creating {thisLibrary} 'In History' metadata file..")
+                        writeInHistory = open(inHistory, "x")
+                        writeInHistory.write(in_history_meta_str)
+                        writeInHistory.close()
+                        print(f"File created")
+                        logging.info(f"File created")
+                        file_location = inHistory.replace('../','config/')
+                        print(f"{file_location}")
+                        logging.info(f"{file_location}")
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
+
 
                 if isInHistory:
                     print(f"Updating {thisLibrary} 'In History' metadata file..")
                     logging.info(f"Updating {thisLibrary} 'In History' metadata file..")
-
+                    file_location = inHistory.replace('../','config/')
+                    print(f"{file_location}")
+                    logging.info(f"{file_location}")
+    
                     with open(inHistory, "r") as inHistory_file:
                         check_InHistory_Title = yaml.load(inHistory_file)
-
+                        
+                        
+                        
                         for key, value in check_InHistory_Title['collections'].items():
-
                             if key != collection_title:
                                 print(f'''Collection for {thisLibrary} has been changed from {key} ==> {collection_title}
 Attempting to remove unused collection.''')
@@ -1772,11 +1876,11 @@ Attempting to remove unused collection.''')
                                 if delete_old_collection == False:
                                     print(f"Could not remove deprecated '{key}' collection.")
                                     logging.warning(f"Could not remove deprecated '{key}' collection.")
-                                check_InHistory_Title['collections'][collection_title] = value
-                                del check_InHistory_Title['collections'][key]
 
                     with open(inHistory, "w") as write_inHistory:
-                        yaml.dump(check_InHistory_Title, write_inHistory)
+                        write_inHistory.write(in_history_meta_str)
+                        print()
+                        print(f'''{in_history_meta_str}''')
 
 
                 month_names = [
@@ -1785,7 +1889,6 @@ Attempting to remove unused collection.''')
             ]
                 
                 
-
                 if range == 'day':
                     today = datetime.now()
                     start_date = today
@@ -1839,19 +1942,37 @@ Attempting to remove unused collection.''')
     "sort_how": "asc"
 }}
     '''
-
                 print("Clearing " + thisLibrary + " trakt list...")
                 logging.info("Clearing " + thisLibrary + " trakt list...")
                 traktDeleteList = requests.delete(traktListUrlPost, headers=traktHeaders)
+                if traktDeleteList.status_code == 201 or 200 or 204:
+                    print("List cleared")
                 time.sleep(1.25)
                 traktMakeList = requests.post(traktListUrl, headers=traktHeaders, data=traktListData)
+                if traktMakeList.status_code == 201 or 200 or 204:
+                    print("Initialization successful.")
                 time.sleep(1.25)
                 traktListItems = '''
 {'''
                 traktListItems += f'''
     "{trakt_type}": [
         '''
-
+                print(f"Filtering ==> This '{range}' in history")
+                logging.info(f'Filtering ==> This {range} in history')
+                if extension.starting != 0:
+                    print(f"From {extension.starting} to {extension.ending}")
+                    logging.info(f"From {extension.starting} to {extension.ending}")
+                if extension.starting == 0:
+                    print(f"From earliest to {extension.ending}")
+                    logging.info(f"From earliest to {extension.ending}")
+                if extension.increment != 1:
+                    print(f"{extension.increment} year increment")
+                    logging.info(f"{extension.increment} year increment")
+                if extension.increment == 1:
+                    print(f"Using all years")
+                    logging.info(f"Using all years")
+                print(f'''
+''')
                 library_List = plex.library.list(thisLibrary)
                 library_List = sorted(library_List, key=lambda item: item.date)
                 library_List_inRange = [item for item in library_List 
@@ -1863,26 +1984,27 @@ Attempting to remove unused collection.''')
                     if title_inRange.details.tmdb and title_inRange.details.imdb and title_inRange.details.tvdb == 'Null':
                         continue
                     
-                    print(f"Adding {title_inRange.title} ({title_inRange_month} {title_inRange.date.day}, {title_inRange.date.year})")
-                    logging.info(f"Adding {title_inRange.title} ({title_inRange_month} {title_inRange.date.day}, {title_inRange.date.year})")
-
-                    traktListItems += f'''
+                    if (extension.starting <= title_inRange.date.year <= extension.ending 
+                        and (extension.ending - title_inRange.date.year) % extension.increment == 0):
+                        print(f"Adding {title_inRange.title} ({title_inRange_month} {title_inRange.date.day}, {title_inRange.date.year})")
+                        logging.info(f"Adding {title_inRange.title} ({title_inRange_month} {title_inRange.date.day}, {title_inRange.date.year})")
+                        traktListItems += f'''
     {{
     "ids": {{'''
                 
-                    if title_inRange.details.tmdb != 'Null':
-                        traktListItems += f'''
+                        if title_inRange.details.tmdb != 'Null':
+                            traktListItems += f'''
         "tmdb": "{title_inRange.details.tmdb}",'''
-                    if title_inRange.details.tvdb != 'Null':
-                        traktListItems += f'''
+                        if title_inRange.details.tvdb != 'Null':
+                            traktListItems += f'''
         "tvdb": "{title_inRange.details.tvdb}",'''
-                    if title_inRange.details.imdb != 'Null':
-                        traktListItems += f'''
+                        if title_inRange.details.imdb != 'Null':
+                            traktListItems += f'''
         "imdb": "{title_inRange.details.imdb}",'''
                         
-                    traktListItems = traktListItems.rstrip(",")
+                        traktListItems = traktListItems.rstrip(",")
                     
-                    traktListItems += f'''
+                        traktListItems += f'''
             }}
     }},'''
         
@@ -1899,10 +2021,12 @@ Attempting to remove unused collection.''')
                     logging.info(f"Successfully posted This {range} In History items for {thisLibrary}")
 
                     
-    except:
+    except KeyError:
         print(f"No extensions set for {thisLibrary}.")
         logging.info(f"No extensions set for {thisLibrary}.")
         continue
+    except Exception as e:
+        print(f"Exception Error: {str(e)}")
 
 
 extension_end_time = time.time()
