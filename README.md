@@ -1,9 +1,9 @@
 # pattrmm-develop
+![returning soon](https://github.com/InsertDisc/pattrmm-develop/assets/31751462/e2c45ec9-f7e2-416b-9884-e02207a199bc)
 PATTRMM (Plex Assistant To The Regional Meta Manager) is a python script that automates a 'Returning Soon' Trakt list in chronological order by date and matching metadata and overlay file for use in Plex Meta Manager.
 Extensions have been added to further PATTRMM's capabilities.
 
-Requirements:
-    
+Requirements:    
     Trakt MUST be setup in your PMM installation to post 'returning soon' series and various 'extensions' to.
     This is also what the *-returning-soon.yml and *-in-history.yml files will pull from.
     The only must-have module is ruamel.yaml. This is included in requirements.txt. 
@@ -151,6 +151,9 @@ Extension settings
 ```
 in-history:
 Enables the 'In History' extension for a library.
+![this_month_in_history](https://github.com/InsertDisc/pattrmm-develop/assets/31751462/71575460-c575-4b12-9e77-77ec6a8a59e5)
+![this_week_in_history](https://github.com/InsertDisc/pattrmm-develop/assets/31751462/f412f703-1d81-4bd1-9a0b-87b10789f271)
+
 
   In History specific settings
 
