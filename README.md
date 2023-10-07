@@ -182,7 +182,7 @@ Enables the 'In History' extension for a library.
         Allows you to specify the 'spacing' between valid years.
         Given an 'ending' year of 2003, would only match to titles released every 10 years out.
         So, 2003, 1993, 1983, 1973
-        If an 'ending' year is not specified then the current year will be included and used as the initial year.
+        If an 'ending' year is not specified then the current year will be used as the initial year.
 
   save_folder: collections/
         Specify a location to write the extension metadata file to. Your PMM config folder
