@@ -149,13 +149,13 @@ Note: These do not need disabled in a 'Movies' only setup. 'Returning Soon' is n
 libraries and will skip those libraries.
 ```
 Extension settings
-```
+
 in-history:
 Enables the 'In History' extension for a library.
 ![this_month_in_history](https://github.com/InsertDisc/pattrmm-develop/assets/31751462/71575460-c575-4b12-9e77-77ec6a8a59e5)
 ![this_week_in_history](https://github.com/InsertDisc/pattrmm-develop/assets/31751462/f412f703-1d81-4bd1-9a0b-87b10789f271)
 
-
+```
   In History specific settings
 
   range: month
