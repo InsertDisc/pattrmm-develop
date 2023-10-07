@@ -1757,7 +1757,6 @@ overlays:
 '''
     
     postShow = requests.post(traktListUrlPostShow, headers=traktHeaders, data=traktListShow)
-    print(postShow.status_code)
     if postShow.status_code == 201:
         print("Success")
         print("Added " + str(get_count(returningSorted)) + " entries to Trakt.")
@@ -1842,7 +1841,7 @@ Extension setting found. Running 'In History' on {thisLibrary}
                         writeInHistory.close()
                         print(f"File created")
                         logging.info(f"File created")
-                        file_location = inHistory.replace('../','config/')
+                        file_location = f"config/{extension.save_folder}{slug}-in-history.yml"
                         print(f"{file_location}")
                         logging.info(f"{file_location}")
                     except Exception as e:
@@ -1852,7 +1851,7 @@ Extension setting found. Running 'In History' on {thisLibrary}
                 if isInHistory:
                     print(f"Updating {thisLibrary} 'In History' metadata file..")
                     logging.info(f"Updating {thisLibrary} 'In History' metadata file..")
-                    file_location = inHistory.replace('../','config/')
+                    file_location = f"config/{extension.save_folder}{slug}-in-history.yml"
                     print(f"{file_location}")
                     logging.info(f"{file_location}")
     
@@ -1879,8 +1878,10 @@ Attempting to remove unused collection.''')
 
                     with open(inHistory, "w") as write_inHistory:
                         write_inHistory.write(in_history_meta_str)
-                        print()
+                        print('')
                         print(f'''{in_history_meta_str}''')
+                        logging.info('')
+                        logging.info(f'''{in_history_meta_str}''')
 
 
                 month_names = [
@@ -1985,7 +1986,8 @@ Attempting to remove unused collection.''')
                         continue
                     
                     if (extension.starting <= title_inRange.date.year <= extension.ending 
-                        and (extension.ending - title_inRange.date.year) % extension.increment == 0):
+                        and (extension.ending - title_inRange.date.year) % extension.increment == 0
+                        and title_inRange.date.year != today.year):
                         print(f"Adding {title_inRange.title} ({title_inRange_month} {title_inRange.date.day}, {title_inRange.date.year})")
                         logging.info(f"Adding {title_inRange.title} ({title_inRange_month} {title_inRange.date.day}, {title_inRange.date.year})")
                         traktListItems += f'''
