@@ -228,7 +228,8 @@ Enables the 'In History' extension for a library.
             collection_order: custom
             sync_mode: sync
 
-        Any of the options under 'Released This Month In History' can be overwritten with meta options.
+        Any of the options under 'Released This Month In History'
+        can be overwritten with meta options.
         meta:
           visible_home: false
           collection_order: critic_rating.desc
@@ -272,8 +273,10 @@ What now:
 
     Add the ?-returning-soon.yml under the appropriate metadata section 
     of the corresponding library you are having it scan.
-    Add the overlays/?-returning-soon-overlay.yml under the appropriate overlay section of the same library.
-    Don't forget to add any additional metadata files that any 'extensions' you are using create as well.
+    Add the overlays/?-returning-soon-overlay.yml 
+    under the appropriate overlay section of the same library.
+    Don't forget to add any additional metadata files 
+    that any 'extensions' you are using create as well.
 
 When to run:
     
@@ -282,8 +285,9 @@ When to run:
     After the initial full cycle, only new entries in Plex will get detailed searches. 
     Any series that are not considered a returning series will not be
     updated upon following runs. 
-    Any series that loses it's 'Returning Series' status will be updated accordingly and removed
-    from further searches. This greatly speeds up the process of daily executions.
+    Any series that loses it's 'Returning Series' status will be updated accordingly 
+    and removed from further searches. 
+    This greatly speeds up the process of daily executions.
 
     Docker version runs daily at the specified PATTRMM_TIME. This is a 24 hour format.
 
