@@ -14,10 +14,13 @@ Requirements:
 
 For stand-alone setup:
     
-    Just drop pattrymm.py in a subfolder of your Plex Meta Manager config folder (i.e. Plex-meta-manager/config/pattrmm/pattrmm.py) and run it. A settings file will be created in
-    the newly created preferences folder. The script will stop so you can fill in the appropriate settings in preferences/settings.yml.
+    Just drop pattrymm.py in a subfolder of your Plex Meta Manager config folder 
+    (i.e. Plex-meta-manager/config/pattrmm/pattrmm.py) and run it. 
+    A settings file will be created in the newly created preferences folder. 
+    The script will stop so you can fill in the appropriate settings in preferences/settings.yml.
     You can modify the appearance of the generated overlays file using the
-    preferences/*-returning-soon-template.yml files. Run the script again after you make your changes to initiate a full cycle.
+    preferences/*-returning-soon-template.yml files. 
+    Run the script again after you make your changes to initiate a full cycle.
 
 Docker Compose:
 ```
@@ -40,7 +43,8 @@ If using the docker version, you can initialize the settings file with this comm
 ```
 docker run --rm -it -v "./pattrmm/preferences:/preferences" ghcr.io/insertdisc/pattrmm:develop --run
 ```
-The DEVELOP branch is slightly ahead of the latest branch. Extensions have been added and will continue to expand.
+The DEVELOP branch is slightly ahead of the latest branch. 
+Extensions have been added and will continue to expand.
 ```
 Extensions Available:
   in-history
@@ -118,17 +122,19 @@ extra_overlays:
 Standard library options:
 ```
 refresh: 30
-Invterval in days to do a full refresh of the libraries airing status. Sometimes things change.
+Invterval in days to do a full refresh of the libraries airing status.
+Sometimes things change.
 This makes sure you stay up to date.
 
 days_ahead: 45
-How far ahead a title should still be considered 'Returning Soon'. For example, 45,
-would consider any title that has a 'Returning' status and airs again within the next
-45 days to be 'Returning Soon'.
+How far ahead a title should still be considered 'Returning Soon'.
+For example, 45, would consider any title that has a 'Returning' status
+and airs again within the next 45 days to be 'Returning Soon'.
 
 returning-soon: False
-For those that would like to only run extensions on a 'show' library. This will disable PATTRMM's default
-'Returning Soon' operations on this library. The default setting is True and does not need declared.
+For those that would like to only run extensions on a 'show' library.
+This will disable PATTRMM's default 'Returning Soon' operations on this library.
+The default setting is True and does not need declared.
 ```
 Standard PATTRMM options
 ```
@@ -140,13 +146,14 @@ This changes how the dates are formatted in the generated overlay files.
     Will display dates as dd/mm (31/12) for December 31st
 
 extra_overlays:
-Included here are various settings used to customize additional 'airing status' overlays to be included in
-the generated overlay yml. If they are not wanted they will need to be disabled with
+Included here are various settings used to customize additional 'airing status' overlays
+to be included in the generated overlay yml.
+If they are not wanted they will need to be disabled with
 use: False
 as the default behavior is to have them enabled.
 
-Note: These do not need disabled in a 'Movies' only setup. 'Returning Soon' is not compatible with 'Movies'
-libraries and will skip those libraries.
+Note: These do not need disabled in a 'Movies' only setup.
+'Returning Soon' is not compatible with 'Movies' libraries and will skip those libraries.
 ```
 Extension settings
 
@@ -173,13 +180,13 @@ Enables the 'In History' extension for a library.
         of qualified years.
 
   starting: 1975
-        Allows you to specify the 'earliest' year the filter will go back till. A setting of 1975 would
-        not include anything released prior to 1975.
+        Allows you to specify the 'earliest' year the filter will go back till.
+        A setting of 1975 would not include anything released prior to 1975.
         If this declaration is missing then all items up to the 'earliest' will be included.
 
   ending: 1999
-        Allows you to specify the 'latest' year the filter will go up to. 1999 Would not include anything
-        released after that year.
+        Allows you to specify the 'latest' year the filter will go up to.
+        1999 Would not include anything released after that year.
         If this delcaration is missing then up to the current year will be included.
 
   increment: 10
@@ -190,19 +197,23 @@ Enables the 'In History' extension for a library.
 
   save_folder: collections/
         Specify a location to write the extension metadata file to. Your PMM config folder
-        (where your config.yml is), will always be the BASE location. So, a save_folder of 'collections/'
-        would put your file in a 'collections' sub-folder. If this directory does not exist PATTRMM
-        will ATTEMPT to create it.
+        (where your config.yml is), will always be the BASE location.
+        So, a save_folder of 'collections/'
+        would put your file in a 'collections' sub-folder. If this directory does not exist
+        PATTRMM will ATTEMPT to create it.
 
   collection_title: Released this {{range}} in history.
         Title for the collection in the generated metadata yml file.
-        This can be manually written entirely or you can use {{range}} to fill in the range automatically.
-        Given a range of 'month', Released this {{range}} in history, would generate:
+        This can be manually written entirely or you can use {{range}}
+        to fill in the range automatically.
+        Given a range of 'month',
+        Released this {{range}} in history, would generate:
             Released this month in history
         {{Range}} can be used instead for a capitalized range.
         Released This {{Range}} In History, would generate:
             Released This Month In History
-        The {{range}} and {{Range}} placeholders will also work in a 'summary' if you decide to add one to meta options.
+        The {{range}} and {{Range}} placeholders will also work in a 'summary'
+        if you decide to add one to meta options.
 
   meta:
         Here's where you can apply your 'touch'.
@@ -259,15 +270,19 @@ In-History supports ONE range per library.
 ```
 What now:
 
-    Add the ?-returning-soon.yml under the appropriate metadata section of the corresponding library you are having it scan.
+    Add the ?-returning-soon.yml under the appropriate metadata section 
+    of the corresponding library you are having it scan.
     Add the overlays/?-returning-soon-overlay.yml under the appropriate overlay section of the same library.
     Don't forget to add any additional metadata files that any 'extensions' you are using create as well.
 
 When to run:
     
-    I've tried my best to optimize how PATTRMM runs, meaning, you can run it on a daily basis using whatever scheduling service your OS utilizes. After the initial full cycle,
-    only new entries in Plex will get detailed searches. Any series that are not considered a returning series will not be
-    updated upon following runs. Any series that loses it's 'Returning Series' status will be updated accordingly and removed
+    I've tried my best to optimize how PATTRMM runs, meaning, 
+    you can run it on a daily basis using whatever scheduling service your OS utilizes. 
+    After the initial full cycle, only new entries in Plex will get detailed searches. 
+    Any series that are not considered a returning series will not be
+    updated upon following runs. 
+    Any series that loses it's 'Returning Series' status will be updated accordingly and removed
     from further searches. This greatly speeds up the process of daily executions.
 
     Docker version runs daily at the specified PATTRMM_TIME. This is a 24 hour format.
