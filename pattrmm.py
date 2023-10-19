@@ -86,9 +86,9 @@ libraries:
   TV Shows:                          # Plex Libraries to read from. Can enter multiple libraries.
     refresh: 30                      # Full-refresh delay for library          
     days_ahead: 30                   # How far ahead to consider 'Returning Soon'
-      extensions:
-        in-history:
-          range: month
+    extensions:
+      in-history:
+        range: month
 date_style: 1                        # 1 for mm/dd, 2 for dd/mm
 overlay_prefix: "RETURNING"          # Text to display before the dates.
 leading_zeros: True                  # 01/14 vs 1/14 for dates. True or False
