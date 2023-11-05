@@ -89,19 +89,35 @@ libraries:
     extensions:
       in-history:
         range: month
+        trakt_list_privacy: private
 date_style: 1                        # 1 for mm/dd, 2 for dd/mm
 overlay_prefix: "RETURNING"          # Text to display before the dates.
+horizontal_align: center
+vertical_align: top
+vertical_offset: 0
+horizontal_offset: 0
 leading_zeros: True                  # 01/14 vs 1/14 for dates. True or False
 date_delimiter: "/"                  # Delimiter for dates. Can be "/", "-", "." or "_", e.g. 01/14, 01-14, 01.14, 01_14
 year_in_dates: False                 # Show year in dates: 01/14/22 vs 01/14. True or False
 returning_soon_bgcolor: "#81007F"
 returning_soon_fontcolor: "#FFFFFF"
+trakt_list_privacy: private
+save_folder: "metadata/"
 extra_overlays:
   new:
     use: True
     bgcolor: "#008001"
     font_color: "#FFFFFF"
     text: "N E W  S E R I E S"
+    horizontal_align: center
+    vertical_align: top
+  upcoming:
+    use: True
+    bgcolor: "#fc4e03"
+    font_color: "#FFFFFF"
+    text: "U P C O M I N G"
+    horizontal_align: center
+    vertical_align: top
   airing:
     use: True
     bgcolor: "#343399"
@@ -222,6 +238,10 @@ class Extensions:
             slug = cleanPath(self.extension_library)
             self.slug = slug
             trakt_list_meta = f"https://trakt.tv/users/{me}/lists/in-history-{slug}"
+            try:
+                self.trakt_list_privacy = pref['libraries'][self.extension_library]['extensions']['in-history']['trakt_list_privacy']
+            except KeyError:
+                self.trakt_list_privacy = 'private'
             try:
                 range = pref['libraries'][self.extension_library]['extensions']['in-history']['range']
                 range_lower = range.lower()
@@ -702,10 +722,47 @@ def setting(value):
         with open(settings) as sf:
             pref = yaml.load(sf)
         
+            if value == 'trakt_list_privacy':
+                try:
+                    entry = pref['trakt_list_privacy']
+                except KeyError:
+                    entry = 'private'
+                    
+            if value == 'save_folder':
+                try:
+                    entry = pref['save_folder']
+                except KeyError:
+                    entry = ''
+
             if value == 'rsback_color':
                 entry = pref['returning_soon_bgcolor']
             if value == 'rsfont_color':
                 entry = pref['returning_soon_fontcolor']
+
+            if value == 'rs_vertical_align':
+                try:
+                    entry = pref['vertical_align']
+                except KeyError:
+                    entry = 'Top'
+
+            if value == 'rs_horizontal_align':
+                try:
+                    entry = pref['horizontal_align']
+                except KeyError:
+                    entry = 'Center'
+
+            if value == 'rs_horizontal_offset':
+                try:
+                    entry = pref['horizontal_offset']
+                except KeyError:
+                    entry = '0'
+
+            if value == 'rs_vertical_offset':
+                try:
+                    entry = pref['vertical_offset']
+                except KeyError:
+                    entry = '0'
+
             if value == 'prefix':
                 entry = pref['overlay_prefix']
             if value == 'dateStyle':
@@ -725,6 +782,55 @@ def setting(value):
                     entry = pref['year_in_dates']
                 except:
                     entry = False
+
+
+            if value == 'ovUpcoming':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['use']
+                except:
+                    entry = False
+            if value == 'ovUpcomingColor':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['bgcolor']
+                except KeyError:
+                    entry = "#fc4e03"
+            if value == 'ovUpcomingFontColor':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['font_color']
+                except KeyError:
+                    entry = "#FFFFFF"
+            if value == 'ovUpcomingText':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['text']
+                except KeyError:
+                    entry = "U P C O M I N G"
+
+            if value == 'ovUpcoming_horizontal_align':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['horizontal_align']
+                except KeyError:
+                    entry = 'Center'
+
+            if value == 'ovUpcoming_vertical_align':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['vertical_align']
+                except KeyError:
+                    entry = 'Top'
+
+            if value == 'ovUpcoming_horizontal_offset':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['horizontal_offset']
+                except KeyError:
+                    entry = '0'
+
+            if value == 'ovUpcoming_vertical_offset':
+                try:
+                    entry = pref['extra_overlays']['upcoming']['vertical_offset']
+                except KeyError:
+                    entry = '0'
+
+
+
             if value == 'ovNew':
                 try:
                     entry = pref['extra_overlays']['new']['use']
@@ -736,6 +842,35 @@ def setting(value):
                  entry = pref['extra_overlays']['new']['font_color']
             if value == 'ovNewText':
                  entry = pref['extra_overlays']['new']['text']
+
+            if value == 'ovNew_horizontal_align':
+                try:
+                    entry = pref['extra_overlays']['new']['horizontal_align']
+                except KeyError:
+                    entry = 'Center'
+
+            if value == 'ovNew_vertical_align':
+                try:
+                    entry = pref['extra_overlays']['new']['vertical_align']
+                except KeyError:
+                    entry = 'Top'
+
+            if value == 'ovNew_horizontal_offset':
+                try:
+                    entry = pref['extra_overlays']['new']['horizontal_offset']
+                except KeyError:
+                    entry = '0'
+
+            if value == 'ovNew_vertical_offset':
+                try:
+                    entry = pref['extra_overlays']['new']['vertical_offset']
+                except KeyError:
+                    entry = '0'
+
+
+
+                 
+            
             if value == 'ovReturning':
                 try:
                     entry = pref['extra_overlays']['returning']['use']
@@ -747,6 +882,34 @@ def setting(value):
                  entry = pref['extra_overlays']['returning']['font_color']
             if value == 'ovReturningText':
                  entry = pref['extra_overlays']['returning']['text']
+
+            if value == 'ovReturning_horizontal_align':
+                try:
+                    entry = pref['extra_overlays']['returning']['horizontal_align']
+                except KeyError:
+                    entry = 'Center'
+
+            if value == 'ovReturning_vertical_align':
+                try:
+                    entry = pref['extra_overlays']['returning']['vertical_align']
+                except KeyError:
+                    entry = 'Top'
+
+            if value == 'ovReturning_horizontal_offset':
+                try:
+                    entry = pref['extra_overlays']['returning']['horizontal_offset']
+                except KeyError:
+                    entry = '0'
+
+            if value == 'ovReturning_vertical_offset':
+                try:
+                    entry = pref['extra_overlays']['returning']['vertical_offset']
+                except KeyError:
+                    entry = '0'
+
+
+
+
             if value == 'ovAiring':
                 try:
                     entry = pref['extra_overlays']['airing']['use']
@@ -758,6 +921,34 @@ def setting(value):
                  entry = pref['extra_overlays']['airing']['font_color']
             if value == 'ovAiringText':
                  entry = pref['extra_overlays']['airing']['text']
+
+            if value == 'ovAiring_horizontal_align':
+                try:
+                    entry = pref['extra_overlays']['airing']['horizontal_align']
+                except KeyError:
+                    entry = 'Center'
+
+            if value == 'ovAiring_vertical_align':
+                try:
+                    entry = pref['extra_overlays']['airing']['vertical_align']
+                except KeyError:
+                    entry = 'Top'
+
+            if value == 'ovAiring_horizontal_offset':
+                try:
+                    entry = pref['extra_overlays']['airing']['horizontal_offset']
+                except KeyError:
+                    entry = '0'
+
+            if value == 'ovAiring_vertical_offset':
+                try:
+                    entry = pref['extra_overlays']['airing']['vertical_offset']
+                except KeyError:
+                    entry = '0'
+
+
+
+
             if value == 'ovEnded':
                 try:
                     entry = pref['extra_overlays']['ended']['use']
@@ -769,6 +960,34 @@ def setting(value):
                  entry = pref['extra_overlays']['ended']['font_color']
             if value == 'ovEndedText':
                  entry = pref['extra_overlays']['ended']['text']
+
+            if value == 'ovEnded_horizontal_align':
+                try:
+                    entry = pref['extra_overlays']['ended']['horizontal_align']
+                except KeyError:
+                    entry = 'Center'
+
+            if value == 'ovEnded_vertical_align':
+                try:
+                    entry = pref['extra_overlays']['ended']['vertical_align']
+                except KeyError:
+                    entry = 'Top'
+
+            if value == 'ovEnded_horizontal_offset':
+                try:
+                    entry = pref['extra_overlays']['ended']['horizontal_offset']
+                except KeyError:
+                    entry = '0'
+
+            if value == 'ovEnded_vertical_offset':
+                try:
+                    entry = pref['extra_overlays']['ended']['vertical_offset']
+                except KeyError:
+                    entry = '0'
+
+
+
+
             if value == 'ovCanceled':
                 try:
                     entry = pref['extra_overlays']['canceled']['use']
@@ -779,7 +998,32 @@ def setting(value):
             if value == 'ovCanceledFontColor':
                  entry = pref['extra_overlays']['canceled']['font_color']
             if value == 'ovCanceledText':
-                 entry = pref['extra_overlays']['canceled']['text']   
+                 entry = pref['extra_overlays']['canceled']['text']
+
+            if value == 'ovCanceled_horizontal_align':
+                try:
+                    entry = pref['extra_overlays']['canceled']['horizontal_align']
+                except KeyError:
+                    entry = 'Center'
+
+            if value == 'ovCanceled_vertical_align':
+                try:
+                    entry = pref['extra_overlays']['canceled']['vertical_align']
+                except KeyError:
+                    entry = 'Top'
+
+            if value == 'ovCanceled_horizontal_offset':
+                try:
+                    entry = pref['extra_overlays']['canceled']['horizontal_offset']
+                except KeyError:
+                    entry = '0'
+
+            if value == 'ovCanceled_vertical_offset':
+                try:
+                    entry = pref['extra_overlays']['canceled']['vertical_offset']
+                except KeyError:
+                    entry = '0'
+
         return entry
 
 def traktApi(type):
@@ -839,6 +1083,7 @@ def plexGet(identifier):
 def cleanPath(string):
         cleanedPath = re.sub(r'[^\w]+', '-', string)
         return cleanedPath
+
 ''')
 
 
@@ -939,9 +1184,28 @@ for library in loadSettings['libraries']:
 
     # cache file for tmdb details
     cache = "./data/" + libraryCleanPath + "-tmdb-cache.json"
+
+    # returning soon metadata save folder
+    metadata_save_folder = vars.setting('save_folder')
+    save_folder = configPathPrefix + metadata_save_folder
+    if save_folder != '':
+        is_save_folder = os.path.exists(save_folder)
+        if not is_save_folder:
+            subfolder_display_path = f"config/{metadata_save_folder}"
+            print(f"Sub-folder {subfolder_display_path} not found.")
+            print(f"Attempting to create.")
+            logging.info(f"Sub-folder {subfolder_display_path} not found.")
+            logging.info(f"Attempting to create.")
+            try:
+                os.makedirs(save_folder)
+                print(f"{subfolder_display_path} created successfully.")
+                logging.info(f"{subfolder_display_path} created successfully.")
+            except Exception as sf:
+                print(f"Exception: {str(sf)}")
+                logging.warning(f"Exception: {str(sf)}")
     
     # returning-soon metadata file for collection
-    meta = configPathPrefix + libraryCleanPath + "-returning-soon.yml"
+    meta = save_folder + libraryCleanPath + "-returning-soon-metadata.yml"
     # generated overlay file path
     rso = configPathPrefix + "overlays/" + libraryCleanPath + "-returning-soon-overlay.yml"
     # overlay template path
@@ -1037,10 +1301,10 @@ templates:
     builder_level: show
     overlay:
       name: text(<<text>>)
-      horizontal_offset: 0
-      horizontal_align: center
-      vertical_offset: 0
-      vertical_align: top
+      horizontal_offset: <<horizontal_offset>>
+      horizontal_align: <<horizontal_align>>
+      vertical_offset: <<vertical_offset>>
+      vertical_align: <<vertical_align>>
       font: config/fonts/Juventus-Fans-Bold.ttf
       font_size: 70
       font_color: <<color>>
@@ -1049,6 +1313,12 @@ templates:
       back_color: <<back_color>>
       back_width: 1920
       back_height: 90
+
+    default:
+      horizontal_align: center
+      vertical_align: top
+      horizontal_offset: 0
+      vertical_offset: 0
 '''
     )
         writeTemp.close()
@@ -1507,11 +1777,50 @@ templates:
 overlays:
     '''
 
+    
+    if vars.setting('ovUpcoming') == True:
+        logging.info('"Upcoming" Overlay enabled, generating body...')
+        upcoming_Text = vars.setting('ovUpcomingText')
+        upcoming_FontColor = vars.setting('ovUpcomingFontColor')
+        upcoming_Color = vars.setting('ovUpcomingColor')
+        upcoming_horizontal_align = vars.setting('ovUpcoming_horizontal_align')
+        upcoming_vertical_align = vars.setting('ovUpcoming_vertical_align')
+        upcoming_horizontal_offset = vars.setting('ovUpcoming_horizontal_offset')
+        upcoming_vertical_offset = vars.setting('ovUpcoming_vertical_offset')
+        ovUpcoming = f'''
+  # New
+  TV_Top_TextCenter_New:
+    template:
+      - name: TV_Top_TextCenter
+        weight: 90
+        text: "{upcoming_Text}"
+        color: "{upcoming_FontColor}"
+        back_color: "{upcoming_Color}"
+        horizontal_align: {upcoming_horizontal_align}
+        vertical_align: {upcoming_vertical_align}
+        horizontal_offset: {upcoming_horizontal_offset}
+        vertical_offset: {upcoming_vertical_offset}
+    plex_all: true
+    filters:
+      tmdb_status:
+      - returning
+      - planned
+      - production
+      release.after: today
+      '''
+        overlay_base = overlay_base + ovUpcoming
+    
+    
+    
     if vars.setting('ovNew') == True:
         logging.info('"New" Overlay enabled, generating body...')
         newText = vars.setting('ovNewText')
         newFontColor = vars.setting('ovNewFontColor')
         newColor = vars.setting('ovNewColor')
+        new_horizontal_align = vars.setting('ovNew_horizontal_align')
+        new_vertical_align = vars.setting('ovNew_vertical_align')
+        new_horizontal_offset = vars.setting('ovNew_horizontal_offset')
+        new_vertical_offset = vars.setting('ovNew_vertical_offset')
         ovNew = f'''
   # New
   TV_Top_TextCenter_New:
@@ -1521,6 +1830,10 @@ overlays:
         text: "{newText}"
         color: "{newFontColor}"
         back_color: "{newColor}"
+        horizontal_align: {new_horizontal_align}
+        vertical_align: {new_vertical_align}
+        horizontal_offset: {new_horizontal_offset}
+        vertical_offset: {new_vertical_offset}
     plex_all: true
     filters:
       tmdb_status:
@@ -1542,6 +1855,10 @@ overlays:
         airingText = vars.setting('ovAiringText')
         airingFontColor = vars.setting('ovAiringFontColor')
         airingColor = vars.setting('ovAiringColor')
+        airing_horizontal_align = vars.setting('ovAiring_horizontal_align')
+        airing_vertical_align = vars.setting('ovAiring_vertical_align')
+        airing_horizontal_offset = vars.setting('ovAiring_horizontal_offset')
+        airing_vertical_offset = vars.setting('ovAiring_vertical_offset')
         ovAiring = f'''
   # Airing
   TV_Top_TextCenter_Airing:
@@ -1551,6 +1868,10 @@ overlays:
         text: "{airingText}"
         color: "{airingFontColor}"
         back_color: "{airingColor}"
+        horizontal_align: {airing_horizontal_align}
+        vertical_align: {airing_vertical_align}
+        horizontal_offset: {airing_horizontal_offset}
+        vertical_offset: {airing_vertical_offset}
     plex_all: true
     filters:
       tmdb_status:
@@ -1567,6 +1888,10 @@ overlays:
         text: "{airingText}"
         color: "{airingFontColor}"
         back_color: "{airingColor}"
+        horizontal_align: {airing_horizontal_align}
+        vertical_align: {airing_vertical_align}
+        horizontal_offset: {airing_horizontal_offset}
+        vertical_offset: {airing_vertical_offset}
     tmdb_discover:
       air_date.gte: {airToday}
       air_date.lte: {airToday}
@@ -1581,6 +1906,10 @@ overlays:
         endedText = vars.setting('ovEndedText')
         endedFontColor = vars.setting('ovEndedFontColor')
         endedColor = vars.setting('ovEndedColor')
+        ended_horizontal_align = vars.setting('ovEnded_horizontal_align')
+        ended_vertical_align = vars.setting('ovEnded_vertical_align')
+        ended_horizontal_offset = vars.setting('ovEnded_horizontal_offset')
+        ended_vertical_offset = vars.setting('ovEnded_vertical_offset')
         ovEnded = f'''
   # Ended
   TV_Top_TextCenter_Ended:
@@ -1590,6 +1919,10 @@ overlays:
         text: "{endedText}"
         color: "{endedFontColor}"
         back_color: "{endedColor}"
+        horizontal_align: {ended_horizontal_align}
+        vertical_align: {ended_vertical_align}
+        horizontal_offset: {ended_horizontal_offset}
+        vertical_offset: {ended_vertical_offset}
     plex_all: true
     filters:
       tmdb_status:
@@ -1603,6 +1936,10 @@ overlays:
         canceledText = vars.setting('ovCanceledText')
         canceledFontColor = vars.setting('ovCanceledFontColor')
         canceledColor = vars.setting('ovCanceledColor')
+        canceled_horizontal_align = vars.setting('ovCanceled_horizontal_align')
+        canceled_vertical_align = vars.setting('ovCanceled_vertical_align')
+        canceled_horizontal_offset = vars.setting('ovCanceled_horizontal_offset')
+        canceled_vertical_offset = vars.setting('ovCanceled_vertical_offset')
         ovCanceled = f'''
   # Canceled
   TV_Top_TextCenter_Canceled:
@@ -1612,6 +1949,10 @@ overlays:
         text: "{canceledText}"
         color: "{canceledFontColor}"
         back_color: "{canceledColor}"
+        horizontal_align: {canceled_horizontal_align}
+        vertical_align: {canceled_vertical_align}
+        horizontal_offset: {canceled_horizontal_offset}
+        vertical_offset: {canceled_vertical_offset}
     plex_all: true
     filters:
       tmdb_status:
@@ -1625,6 +1966,10 @@ overlays:
         returningText = vars.setting('ovReturningText')
         returningFontColor = vars.setting('ovReturningFontColor')
         returningColor = vars.setting('ovReturningColor')
+        returning_horizontal_align = vars.setting('ovReturning_horizontal_align')
+        returning_vertical_align = vars.setting('ovReturning_vertical_align')
+        returning_horizontal_offset = vars.setting('ovReturning_horizontal_offset')
+        returning_vertical_offset = vars.setting('ovReturning_vertical_offset')
         ovReturning = f'''
   # Returning
   TV_Top_TextCenter_Returning:
@@ -1634,6 +1979,10 @@ overlays:
         text: "{returningText}"
         color: "{returningFontColor}"
         back_color: "{returningColor}"
+        horizontal_align: {returning_horizontal_align}
+        vertical_align: {returning_vertical_align}
+        horizontal_offset: {returning_horizontal_offset}
+        vertical_offset: {returning_vertical_offset}
     plex_all: true
     filters:
       tmdb_status:
@@ -1647,6 +1996,10 @@ overlays:
     while thisDayTemp < nextAirDate:
         rsback_color = vars.setting('rsback_color')
         rsfont_color = vars.setting('rsfont_color')
+        rs_horizontal_align = vars.setting('rs_horizontal_align')
+        rs_vertical_align = vars.setting('rs_vertical_align')
+        rs_horizontal_offset = vars.setting('rs_horizontal_offset')
+        rs_vertical_offset = vars.setting('rs_vertical_offset')
         overlay_gen = f'''
 # RETURNING {thisDayDisplay}
   TV_Top_TextCenter_Returning_{thisDayDisplay}:
@@ -1656,6 +2009,10 @@ overlays:
         text: "{prefix} {thisDayDisplayText}"
         color: "{rsfont_color}"
         back_color: "{rsback_color}"
+        horizontal_align: {rs_horizontal_align}
+        vertical_align: {rs_vertical_align}
+        horizontal_offset: {rs_horizontal_offset}
+        vertical_offset: {rs_vertical_offset}
     tmdb_discover:
       air_date.gte: {thisDay}
       air_date.lte: {thisDay}
@@ -1721,11 +2078,12 @@ overlays:
     traktListUrl = "https://api.trakt.tv/users/" + vars.traktApi('me') + "/lists"
     traktListUrlPost = "https://api.trakt.tv/users/" + vars.traktApi('me') + "/lists/returning-soon-" + slug + ""
     traktListUrlPostShow = "https://api.trakt.tv/users/" + vars.traktApi('me') + "/lists/returning-soon-" + slug + "/items"
+    trakt_list_privacy = vars.setting('trakt_list_privacy')
     traktListData = f'''
 {{
     "name": "Returning Soon {library}",
     "description": "Season premiers and returns within the next 30 days.",
-    "privacy": "private",
+    "privacy": "{trakt_list_privacy}",
     "display_numbers": true,
     "allow_comments": true,
     "sort_by": "rank",
@@ -1942,7 +2300,7 @@ Attempting to remove unused collection.''')
 {{
     "name": "In History {thisLibrary}",
     "description": "{description_type} released this {range} in history.",
-    "privacy": "private",
+    "privacy": "{extension.trakt_list_privacy}",
     "display_numbers": true,
     "allow_comments": true,
     "sort_by": "rank",
