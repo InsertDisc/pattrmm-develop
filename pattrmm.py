@@ -84,12 +84,15 @@ if os.path.isfile(settings) == False:
         '''
 libraries:
   TV Shows:                          # Plex Libraries to read from. Can enter multiple libraries.
+    trakt_list_privacy: private
+    save_folder: "metadata/"
     refresh: 30                      # Full-refresh delay for library          
     days_ahead: 30                   # How far ahead to consider 'Returning Soon'
     extensions:
       in-history:
         range: month
         trakt_list_privacy: private
+        save_folder: "collections/"
 date_style: 1                        # 1 for mm/dd, 2 for dd/mm
 overlay_prefix: "RETURNING"          # Text to display before the dates.
 horizontal_align: center
@@ -101,8 +104,7 @@ date_delimiter: "/"                  # Delimiter for dates. Can be "/", "-", "."
 year_in_dates: False                 # Show year in dates: 01/14/22 vs 01/14. True or False
 returning_soon_bgcolor: "#81007F"
 returning_soon_fontcolor: "#FFFFFF"
-trakt_list_privacy: private
-save_folder: "metadata/"
+
 extra_overlays:
   new:
     use: True
@@ -714,6 +716,19 @@ def librarySetting(library, value):
                         entry = 90
                 except:
                     entry = 30
+
+            if value == 'save_folder':
+                try:
+                    entry = pref['libraries'][library]['save_folder']
+                except KeyError:
+                    entry = ''
+
+            if value == 'trakt_list_privacy':
+                try:
+                    entry = pref['libraries'][library]['trakt_list_privacy']
+                except KeyError:
+                    entry = 'private'
+
         return entry
 
 def setting(value):
@@ -721,18 +736,6 @@ def setting(value):
         settings = settings_path
         with open(settings) as sf:
             pref = yaml.load(sf)
-        
-            if value == 'trakt_list_privacy':
-                try:
-                    entry = pref['trakt_list_privacy']
-                except KeyError:
-                    entry = 'private'
-                    
-            if value == 'save_folder':
-                try:
-                    entry = pref['save_folder']
-                except KeyError:
-                    entry = ''
 
             if value == 'rsback_color':
                 entry = pref['returning_soon_bgcolor']
@@ -1084,6 +1087,7 @@ def cleanPath(string):
         cleanedPath = re.sub(r'[^\w]+', '-', string)
         return cleanedPath
 
+
 ''')
 
 
@@ -1186,7 +1190,7 @@ for library in loadSettings['libraries']:
     cache = "./data/" + libraryCleanPath + "-tmdb-cache.json"
 
     # returning soon metadata save folder
-    metadata_save_folder = vars.setting('save_folder')
+    metadata_save_folder = vars.librarySetting(library, 'save_folder')
     save_folder = configPathPrefix + metadata_save_folder
     if save_folder != '':
         is_save_folder = os.path.exists(save_folder)
@@ -2078,7 +2082,7 @@ overlays:
     traktListUrl = "https://api.trakt.tv/users/" + vars.traktApi('me') + "/lists"
     traktListUrlPost = "https://api.trakt.tv/users/" + vars.traktApi('me') + "/lists/returning-soon-" + slug + ""
     traktListUrlPostShow = "https://api.trakt.tv/users/" + vars.traktApi('me') + "/lists/returning-soon-" + slug + "/items"
-    trakt_list_privacy = vars.setting('trakt_list_privacy')
+    trakt_list_privacy = vars.librarySetting(library, 'trakt_list_privacy')
     traktListData = f'''
 {{
     "name": "Returning Soon {library}",
