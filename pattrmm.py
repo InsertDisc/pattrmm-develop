@@ -1844,6 +1844,8 @@ overlays:
         - returning
         - planned
         - production
+        - ended
+        - canceled
       first_episode_aired: 45
       '''
         overlay_base = overlay_base + ovNew
