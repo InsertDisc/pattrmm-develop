@@ -557,6 +557,19 @@ def librarySetting(library, value):
                         entry = 90
                 except:
                     entry = 30
+
+            if value == 'save_folder':
+                try:
+                    entry = pref['libraries'][library]['save_folder']
+                except KeyError:
+                    entry = ''
+
+            if value == 'trakt_list_privacy':
+                try:
+                    entry = pref['libraries'][library]['trakt_list_privacy']
+                except KeyError:
+                    entry = 'private'
+
         return entry
 
 def setting(value):
@@ -564,19 +577,6 @@ def setting(value):
         settings = settings_path
         with open(settings) as sf:
             pref = yaml.load(sf)
-        
-            if value == 'trakt_list_privacy':
-                try:
-                    entry = pref['trakt_list_privacy']
-                except KeyError:
-                    entry = 'private'
-
-            if value == 'save_folder':
-                print("save folder section")
-                try:
-                    entry = pref['save_folder']
-                except KeyError:
-                    entry = ''
 
             if value == 'rsback_color':
                 entry = pref['returning_soon_bgcolor']
